@@ -1,17 +1,18 @@
 FROM alpine:3.19
 
 # Install MariaDB
-RUN apk update && apk add --no-cache mariadb mariadb-client
+RUN apk update && apk add --no-cache nginx openssl
 
 # Copy setup script
-COPY tools/setup.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+COPY tools/generate_cert.sh /generate_cert.sh
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+RUN chmod +x /generate_cert.sh && /generate_cert.sh
 
 # Create run dir
-RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld
+RUN mkdir -p /run/nginx
 
 # Expose port (for completeness)
-EXPOSE 3306
+EXPOSE 443
 
 # Start MariaDB correctly
-CMD ["/docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]

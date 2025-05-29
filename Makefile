@@ -1,13 +1,22 @@
-.PHONY: build up down
+DC=docker compose -f ./srcs/docker-compose.yml --env-file srcs/.env
+
+.PHONY: all build up down re fclean prune logs
+
+all: build up
 
 build:
-	docker-compose build
+	$(DC) build
 
 up:
-	docker-compose up -d
+	$(DC) up -d
 
 down:
-	docker-compose down
+	$(DC) down
+
+re: fclean all
+
+fclean: down
+	docker system prune -af --volumes
 
 logs:
 	docker-compose logs -f

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Define domain
-DOMAIN=${DOMAIN_NAME:-localhost}
+DOMAIN="giuseppe.42.fr"
 
 # Create certs folder
 mkdir -p /etc/nginx/certs
