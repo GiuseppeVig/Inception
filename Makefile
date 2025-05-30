@@ -1,4 +1,4 @@
-DC=docker compose -f ./srcs/docker-compose.yml --env-file srcs/.env
+DC=docker compose -f ./srcs/docker-compose.yml
 
 .PHONY: all build up down re fclean prune logs
 
