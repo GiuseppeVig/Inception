@@ -7,7 +7,7 @@ RUN mkdir -p /etc/nginx/ssl
 RUN openssl req -x509 -nodes \
         -keyout /etc/nginx/ssl/inception.key \
         -out /etc/nginx/ssl/inception.crt \
-        -subj "/C=IT/ST=Lazio/L=Rome/O=42/OU=42/CN=gvigilan.42.fr/UID=giuseppe"
+        -subj "/C=IT/ST=Lazio/L=Rome/O=42/OU=42/CN=gvigilan.42.fr"
 RUN mkdir -p /var/log/nginx/inception
 RUN mkdir -p /var/run/nginx /var/www/inception
 COPY ./conf/nginx.conf /etc/nginx/sites-available/nginx.conf
