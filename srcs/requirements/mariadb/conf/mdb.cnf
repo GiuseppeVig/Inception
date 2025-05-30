@@ -6,3 +6,7 @@ datadir = /var/lib/mysql
 bind_address = 0.0.0.0
 port = 3306
 socket = /dev/null
+
+[client]
+protocol=TCP
+host=127.0.0.1
