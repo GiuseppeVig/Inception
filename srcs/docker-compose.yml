@@ -26,6 +26,8 @@ services:
     networks:
       - inception
     restart: always
+    healthcheck:
+      - cmd 
 
   wordpress:
     build: 

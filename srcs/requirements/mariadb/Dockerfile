@@ -5,7 +5,7 @@ RUN apt-get update && apt-get upgrade -y && \
 
 COPY ./tools/setup_mariadb.sh /setup_mariadb.sh
 
-COPY ./conf/mariadb.cnf /etc/mysql/mariadb.conf.d/mariadb.cnf
+COPY ./conf/mariadb.conf /etc/mysql/mariadb.conf.d/mariadb.conf
 
 RUN chmod +x /setup_mariadb.sh
 
