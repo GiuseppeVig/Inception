@@ -5,6 +5,8 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mysql_install_db --user=mysql --ldata=/var/lib/mysql
 fi
 
+mysqld --defaults-file=/etc/mysql/mariadb.conf.d/mdb.cnf &
+
 service mariadb start
 
 	mariadb --protocol=TCP -h127.0.0.1 -uroot -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
