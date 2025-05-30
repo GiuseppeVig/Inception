@@ -31,8 +31,8 @@ COPY conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
 RUN mkdir -p /run/php && chmod 755 /run/php
 
 # Add WordPress startup script
-COPY tools/wp.sh /usr/local/bin/wp.sh
-RUN chmod +x /usr/local/bin/wp.sh
+COPY tools/setup.sh /usr/local/bin/setup.sh
+RUN chmod +x /usr/local/bin/setup.sh
 
 # Set working directory
 WORKDIR /var/www/html
@@ -41,4 +41,4 @@ WORKDIR /var/www/html
 EXPOSE 9000
 
 # Set entrypoint to your custom script
-ENTRYPOINT ["/usr/local/bin/wp.sh"]
+ENTRYPOINT ["/usr/local/bin/setup.sh"]
