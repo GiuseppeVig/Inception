@@ -1,16 +1,22 @@
 #!/bin/bash
 
-# Start MariaDB in the background
-mysqld_safe --datadir=/var/lib/mysql &
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+  echo "Initializing MariaDB data directory..."
+  mysql_install_db --user=mysql --ldata=/var/lib/mysql
+fi
 
-# Wait for it to become ready (with timeout)
-echo "Waiting for MariaDB to start..."
+# Start MariaDB temporarily to run setup
+mysqld_safe --skip-networking &
+pid="$!"
+
+# Wait for MariaDB to become ready
 timeout=30
 while ! mariadb -uroot -e "SELECT 1;" >/dev/null 2>&1; do
   sleep 1
   timeout=$((timeout-1))
   if [ "$timeout" -le 0 ]; then
     echo "MariaDB failed to start within timeout."
+    kill "$pid"
     exit 1
   fi
 done
@@ -23,4 +29,5 @@ mariadb -uroot -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PAS
 mariadb -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "FLUSH PRIVILEGES;"
 
 # Wait for mysqld_safe to stay in foreground
-wait
+exec mysqld_safe
+
