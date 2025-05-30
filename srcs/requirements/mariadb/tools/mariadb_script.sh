@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    echo "Initializing MariaDB data directory..."
+    mysql_install_db --user=mysql --ldata=/var/lib/mysql
+fi
+
 service mariadb start
 
 	mariadb -uroot -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
@@ -10,4 +15,4 @@ service mariadb start
 	
 mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD shutdown
 
-exec mysqld_safe
+exec mysqld --defaults-file=/etc/mysql/mariadb.conf.d/mdb.cnf
