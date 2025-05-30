@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "Initializing MariaDB data directory..."
-    mysql_install_db --user=mysql --ldata=/var/lib/mysql
-fi
-
 mysqld --defaults-file=/etc/mysql/mariadb.conf.d/mdb.cnf &
 
 service mariadb start
