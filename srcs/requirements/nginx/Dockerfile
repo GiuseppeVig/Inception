@@ -10,8 +10,8 @@ RUN openssl req -x509 -nodes \
         -subj "/C=IT/ST=Lazio/L=Rome/O=42/OU=42/CN=gvigilan.42.fr/UID=giuseppe"
 RUN mkdir -p /var/log/nginx/inception
 RUN mkdir -p /var/run/nginx /var/www/inception
-COPY ./conf/inception /etc/nginx/sites-available/inception
-RUN ln -s /etc/nginx/sites-available/inception /etc/nginx/sites-enabled/inception
+COPY ./conf/nginx.conf /etc/nginx/sites-available/nginx.conf
+RUN ln -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/nginx.conf
 RUN chmod 755 /var/www/inception
 RUN chown -R www-data:www-data /var/www/inception
 
