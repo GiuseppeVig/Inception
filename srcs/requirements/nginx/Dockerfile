@@ -1,15 +1,21 @@
 FROM debian:bullseye
 
-RUN apt-get update
-RUN apt-get install -y nginx openssl
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install openssl nginx -y
 
-COPY conf/nginx.conf /etc/nginx/sites-enabled/nginx.conf
-COPY tools/nginx_start.sh /var/www
+RUN mkdir -p /etc/nginx/ssl
+RUN openssl req -x509 -nodes \
+        -keyout /etc/nginx/ssl/inception.key \
+        -out /etc/nginx/ssl/inception.crt \
+        -subj "/C=IT/ST=Lazio/L=Rome/O=42/OU=42/CN=gvigilan.42.fr/UID=giuseppe"
+RUN mkdir -p /var/log/nginx/inception
+RUN mkdir -p /var/run/nginx /var/www/inception
+COPY ./conf/inception /etc/nginx/sites-available/inception
+RUN ln -s /etc/nginx/sites-available/inception /etc/nginx/sites-enabled/inception
+RUN chmod 755 /var/www/inception
+RUN chown -R www-data:www-data /var/www/inception
 
-RUN chmod +x /var/www/nginx_start.sh && /var/www/nginx_start.sh
 
-EXPOSE 443
+RUN unset MYSQL_PASSWORD MYSQL_ROOT_PASSWORD WORDPRESS_ADMIM_PASS WORDPRESS_USER_PASS
 
-ENTRYPOINT [ "var/www/nginx_start.sh" ]
-
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
