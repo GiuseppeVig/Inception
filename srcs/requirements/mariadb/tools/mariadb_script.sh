@@ -1,11 +1,7 @@
 #!/bin/bash
 
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "Initializing database..."
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql
-	else
-	mysql_upgrade --user=mysql --datadir=/var/lib/mysql
-fi
+mkdir -p /var/lib/mysql
+chown -R mysql:mysql /var/lib/mysql
 
 sleep 20
 
