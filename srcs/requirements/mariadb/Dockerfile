@@ -2,13 +2,9 @@ FROM debian:bullseye
 
 RUN apt-get update && \
 	apt-get install -y \
-	mariadb-server
+	mariadb-server -y
 
-COPY conf/mariadb.conf /etc/mysql/mariadb.conf.d/50-server.cnf
-
-RUN mkdir -p /run/mysqld \
-	&& chown -R mysql:mysql /run/mysqld \
-	&& chmod 775 /run/mysqld
+COPY conf/mariadb.conf /etc/mysql/mariadb.conf.d/mariadb.conf
 
 EXPOSE 3306
 
