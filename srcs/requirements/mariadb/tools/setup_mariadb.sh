@@ -1,10 +1,21 @@
 #!/bin/bash
 set -e
 
-mysqld_safe &
+MAX_TRIES=30
+TRIES=0
+
+chown -R mysql:mysql /var/lib/mysql
+
+# Start MySQL in the background
+mysqld_safe --datadir=/var/lib/mysql &
 
 until mariadb -uroot -e "SELECT 1" &>/dev/null; do
-    echo "Waiting for MariaDB to be ready..."
+    if [ "$TRIES" -ge "$MAX_TRIES" ]; then
+        echo "ERROR: MariaDB did not become ready after $MAX_TRIES attempts."
+        exit 1
+    fi
+    echo "Waiting for MariaDB to be ready... Attempt $((TRIES+1))/$MAX_TRIES"
+    TRIES=$((TRIES+1))
     sleep 1
 done
 
@@ -16,4 +27,4 @@ mariadb -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
 	
 mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD shutdown
 
-wait
+exec mysqld_safe --datadir=/var/lib/mysql
