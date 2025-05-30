@@ -1,18 +1,10 @@
-FROM debian:bullseye
+ROM debian:bullseye
 
 RUN apt-get update && apt-get upgrade -y && \
-	apt-get install -y mariadb-server mariadb-client && \
-	mkdir -p /run/mysqld && \
-	chown -R mysql:mysql /run/mysqld /var/lib/mysql
+    apt-get install mariadb-server -y
 
-RUN mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+COPY ./tools/mariadb_script.sh /mariadb_script.sh
 
-COPY ./tools/setup_mariadb.sh /setup_mariadb.sh
+COPY ./conf/mdb.cnf /etc/mysql/mariadb.conf.d/mdb.cnf
 
-COPY ./conf/mariadb.conf /etc/mysql/mariadb.conf.d/mariadb.conf
-
-EXPOSE 3306
-
-RUN chmod +x /setup_mariadb.sh
-
-ENTRYPOINT ["/setup_mariadb.sh"]
+ENTRYPOINT ["/bin/bash", "/mariadb_script.sh"]
