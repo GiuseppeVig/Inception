@@ -1,18 +1,26 @@
 #!/bin/bash
 
-echo Starting MariaDB Service...
-
+# Start MariaDB in the background
 mysqld_safe --datadir=/var/lib/mysql &
 
-until mariadb -uroot -e "SELECT 1;" >/dev/null 2>&1; do
-  echo "Waiting for MariaDB to start..."
+# Wait for it to become ready (with timeout)
+echo "Waiting for MariaDB to start..."
+timeout=30
+while ! mariadb -uroot -e "SELECT 1;" >/dev/null 2>&1; do
   sleep 1
+  timeout=$((timeout-1))
+  if [ "$timeout" -le 0 ]; then
+    echo "MariaDB failed to start within timeout."
+    exit 1
+  fi
 done
 
-mariadb -uroot -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-mariadb -uroot -e "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';"
-mariadb -uroot -e "GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';"
-mariadb -uroot -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';"
-mariadb -uroot -p $MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
+# Create database and users
+mariadb -uroot -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};"
+mariadb -uroot -e "CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
+mariadb -uroot -e "GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';"
+mariadb -uroot -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
+mariadb -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "FLUSH PRIVILEGES;"
 
+# Wait for mysqld_safe to stay in foreground
 wait

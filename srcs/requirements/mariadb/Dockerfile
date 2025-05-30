@@ -7,4 +7,6 @@ COPY ./tools/setup_mariadb.sh /setup_mariadb.sh
 
 COPY ./conf/mariadb.cnf /etc/mysql/mariadb.conf.d/mariadb.cnf
 
+RUN chmod +x /setup_mariadb.sh
+
 ENTRYPOINT ["/bin/bash", "/setup_mariadb.sh"]
