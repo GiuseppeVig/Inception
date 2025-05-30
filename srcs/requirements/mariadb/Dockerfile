@@ -5,7 +5,7 @@ RUN apt-get update && apt-get upgrade -y && \
 
 RUN rm -f /etc/mysql/my.cnf /etc/mysql/mariadb.cnf
 
-COPY ./conf/mdb.cnf /etc/mysql/mariadb.conf.d/mdb.cnf
+COPY ./conf/mdb.cnf /etc/mysql/mdb.cnf
 COPY ./tools/mariadb_script.sh /mariadb_script.sh
 
 RUN chmod +x /mariadb_script.sh
