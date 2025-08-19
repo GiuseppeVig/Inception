@@ -1,26 +1,53 @@
 #!/bin/bash
+set -e
 
-mkdir -p /var/lib/mysql
-chown -R mysql:mysql /var/lib/mysql
+echo "Initializing MariaDB data directory if needed..."
 
-sleep 20
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+fi
 
-echo "Starting MariaDB with custom config only..."
+echo "Starting MariaDB manually for initialization..."
 
-mysqld --defaults-file=/etc/mysql/mariadb.conf.d/mdb.cnf &
+mysqld --skip-networking --socket=/run/mysqld/mysqld.sock &
+pid="$!"
 
-sleep 20
+# Wait until MariaDB is ready
+for i in {30..0}; do
+    if mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent; then
+        break
+    fi
+    echo -n "."
+    sleep 1
+done
 
-service mariadb start
+if [ "$i" = 0 ]; then
+    echo "MariaDB init process failed."
+    exit 1
+fi
 
-	mariadb --protocol=TCP -h127.0.0.1 -P3306 -uroot -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-	mariadb --protocol=TCP -h127.0.0.1 -P3306 -uroot -e "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';"
-	mariadb --protocol=TCP -h127.0.0.1 -P3306 -uroot -e "GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';"
-	mariadb --protocol=TCP -h127.0.0.1 -P3306 -uroot -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';"
-	mariadb --protocol=TCP -h127.0.0.1 -P3306 -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
-	
-mysqladmin --protocol=TCP -h127.0.0.1 -P3306 -uroot -p$MYSQL_ROOT_PASSWORD shutdown
+echo "Running setup SQL..."
+echo "$MYSQL_ROOT_PASSWORD"
+echo "$MYSQL_DATABASE"
+echo "$MYSQL_USER"
+echo "$MYSQL_PASSWORD"
 
-exec mysqld --defaults-file=/etc/mysql/mariadb.conf.d/mdb.cnf
+if [[ -z "$MYSQL_ROOT_PASSWORD" || -z "$MYSQL_DATABASE" || -z "$MYSQL_USER" || -z "$MYSQL_PASSWORD" ]]; then
+    echo "ERROR: One or more required environment variables are missing."
+    echo "Please set MYSQL_ROOT_PASSWORD, MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD"
+    exit 1
+fi
 
-wait
+mysql --protocol=socket --socket=/run/mysqld/mysqld.sock -u root <<-EOSQL
+    SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${MYSQL_ROOT_PASSWORD}');
+    CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;
+    CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+    GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
+    FLUSH PRIVILEGES;
+EOSQL
+
+echo "Shutting down temporary MariaDB..."
+mysqladmin --protocol=socket --socket=/run/mysqld/mysqld.sock -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
+
+echo "Starting MariaDB in foreground..."
+exec mysqld_safe
