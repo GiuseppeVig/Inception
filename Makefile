@@ -32,7 +32,7 @@ clean:
 
 re: fclean all
 
-fclean: down
+fclean: down clean
 	docker system prune -af --volumes
 
 logs:
