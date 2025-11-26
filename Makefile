@@ -1,5 +1,5 @@
 DC=docker compose -f ./srcs/docker-compose.yml
-DATA_FOLDER= /home/giuseppe/data
+DATA_FOLDER= /home/gvigilan/data
 
 .PHONY: all build up down re fclean prune logs
 
