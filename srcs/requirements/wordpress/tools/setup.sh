@@ -1,7 +1,5 @@
 #! /bin/bash
 
-sleep 30
-
 mkdir -p /run/php
 
 if [ ! -f ./wp-config.php ]; then

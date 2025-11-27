@@ -27,10 +27,12 @@ services:
       - inception
     restart: always
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "gvigilan.42.fr"]
-      interval: 15s
+      test: "mysql -u $MYSQL_ROOT_USER -P 3306 -p$MYSQL_PASSWORD $MYSQL_DATABASE -Bse 'SELECT 1'"
+      start_interval: 3s
+      start_period: 15s
+      interval: 2m
+      retries: 3
       timeout: 5s
-      retries: 5
 
   wordpress:
     build: 
@@ -38,7 +40,8 @@ services:
     image: wordpress
     container_name: wordpress
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     volumes:
       - wordpress_data:/var/www/inception
     env_file:
